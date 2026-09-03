@@ -1,0 +1,123 @@
+Matheus Torquato [07:48]: Opa, Diego, beleza? Tudo certo, tudo certo, tranquilo, graças a Deus.
+
+Diego Daniel Torini [07:52]: Bom também, mestre. Sobre o projeto, você precisaria de alguma informação sobre como ele funcionaria, acessos a API, o lovable como administrador, precisaria que eu transferir ele para você como owner para subir tudo isso.
+
+Matheus Torquato [08:15]: É o que que eu geralmente faço de processo aqui quando entra um projeto assim novo, né? Eu peguei um email aqui, foi feito pela MyStudios, né, onde tem o GitHub ali. Você pode exportar esse projeto, até não sei se você sabe, senão eu te mostro como faz. Pode exportar e me mandar zipado mesmo o arquivo. Vou jogar nesse GitHub que é da Mais Todos, dali eu desenvolvo um projeto, né? Daí a gente tira do Loveable isso, eu consigo publicar ele. Só que aí eu preciso, nessa reunião, o que que a gente vai fazer? Preciso que você me explique. Pode abrir o Loveable aí, me explicar o que que você quer que seja feito, quais integrações que você quer e tudo mais. Dessa reunião que a gente fizer, eu vou extrair a transcrição, te fazer um documento ali que a gente conversou. Vou te mandar esse documento. Depois que eu te mandar esse documento, eu preciso que você enriqueça com mais detalhes. A gente deixou passar alguma informação, alguma coisa, ver se é isso mesmo também, né, a aprovação desse projeto, né. Te passo documento, você pode jogar no cloud. Não sei se você tem costume de usar o cloud, acho que sim, né. E daí você pode enriquecer esse documento e me mandar. Aí desse documento ele serve como norte para eu terminar de desenvolver essa plataforma fora do Loveable. E hospedar num domínio da Mais Todos. A gente pode pensar num domínio também que você queira usar e tudo mais. Interessante agora a gente conversar para entender o que que você quer de fato. E daí você pode exportar esse documento, esses arquivos aí do Loveable e me mandar. Pode mandar para o Slack.
+
+Diego Daniel Torini [09:45]: Então é só para te atualizar também, em paralelo eu tava falando com o Compa e ontem eu falei com ele sobre algumas integrações. A gente já tava tentando subir esse projeto por conta da própria no Git, né? Criei um acesso no Git, tava tentando subir ele, porém ele criou um Git da Mais Todos. Eu passei o projeto para ele zipado, vou até te mandar aqui também. Deixa eu pegar aqui. E ele publicou esse projeto já no GitHub. Deixa eu ver se eu te mandando esse link você tem acesso a ele.
+
+Matheus Torquato [10:17]: Se ele for público, sim, mas é que era até interessante, tá?
+
+Diego Daniel Torini [10:21]: É o da própria, mas todos.
+
+Matheus Torquato [10:23]: Deixa eu ver, é que até interessante ele tá no link desse do Git que eu fiz, porque daí todos os projetos vão ficar nesse Git, que é um Git oficial. Aí para ele não ficar espalhado, ele fica como gerenciador também, né? Então é por isso que é mais interessante.
+
+Diego Daniel Torini [10:42]: Deixa eu ver, eu já tenho até o zip dele aqui, ó, do projeto.
+
+Matheus Torquato [10:46]: Mas pode mandar, que eu coloco ele como colaborador ali no Git. Só mandar o email, eu coloco, não tem problema.
+
+Diego Daniel Torini [10:53]: Perfeito. E qual que era o processo que eu estava travado agora, né? Depois disso tudo que ele conseguiu tracionar para mim, com o time de segurança eu passei para eles validarem tudo certinho e tal. Porém a plataforma ainda tá no logo, né? Seria interessante eles validarem conforme você falou, publicando e tudo mais.
+
+Matheus Torquato [11:12]: Aí eu tenho a documentação de segurança do pessoal de vocês ali da TI. Aí eu até faço o projeto em cima desse documento de segurança também. Então é igual para todos os sistemas, né? E daí ele vai ficar nesse GitHub e fica no domínio dentro do Dockerploy, que é próprio da Mais Todos. O banco de dados é o próprio banco de dados da Mais Todos. Então fica tudo seguro, então não fica usando outros lugares, né? O projeto dentro do Git fica privado, então ele fica bem amarrado assim. Então não tem problema que o Vai, ele não segue de segurança, não é bom assim, sabe? Mas integração de back ele falha bastante.
+
+Diego Daniel Torini [11:52]: Boa, perfeito. Eu vou te mostrar aqui o projeto, compartilhar minha tela. Aí você me confirma na hora que tiver vendo.
+
+Matheus Torquato [12:17]: Já tô vendo, tô vendo.
+
+Diego Daniel Torini [12:19]: Boa. Mandar um link aqui da plataforma também, caso você queira acessar depois.
+
+Matheus Torquato [12:26]: Ele tem senha para entrar?
+
+Diego Daniel Torini [12:28]: Não, é que você cria o acesso na hora com o Domínio Mais Todos. A ideia é permitir somente Domínio Mais Todos, né? Então Então você cria a conta ali com o domínio, com o Google, e aqui na gestão de acesso eu liberaria as suas permissões, né, o que você conseguiria ver. Um exemplo aqui, a ideia é a gente ter operações por time. Então você é do time de crédito, um exemplo, liberaria só acesso ao time de crédito. Aqui dentro do time de crédito você conseguiria ver rotinas de trabalho, documentação de como o pessoal segue os fluxos de trabalho, como, quais são os guias operacionais, o que a pessoa realiza no dia a dia. Então toda essa documentação a gente foi coletando do Notion manualmente, exportando alguns relatórios, trazendo para cá, mas o ideal seria a gente fazer essa conexão via API, né? E além dessas operações de fluxo de conhecimento, a ideia também é trazer a parte operacional. Um exemplo aqui no app onde eu apliquei somente o operacional. Aqui são todos os dados mocados, né? Então eu pesquiso pelo CPF de um afiliado, Vejo que ele tem ali um cashback para ser liberado, né? Atualmente a gente faz esse processo via e-tool. Então, colocando o CPF do afiliado, vendo que ele tem algum cashback pendente, eu conseguiria liberar esse cashback para ele. Então, a ideia, além da pessoa ir lá, sair fazendo liberações, alteração de dados, ter essa segurança também na validação do que cada um tá fazendo, né? Então, aqui seria para auditoria, o motivo do atendimento. A ideia aqui é colocar todo o link do chamado, um exemplo, SUS, e uma numeração que seria o número do chamado que o afiliado solicita, que ele cria. E aqui eu ia confirmar a liberação e ele executa a operação, né? Então isso tudo é auditável.
+
+Matheus Torquato [14:12]: Me explica melhor, esse sistema é que setor que você é? Só para eu—
+
+Diego Daniel Torini [14:16]: eu sou de setor técnico de app, CX/CS.
+
+Matheus Torquato [14:21]: Ah, tá. E esse sistema ele vai ser usado para o setor financeiro, seria?
+
+Diego Daniel Torini [14:27]: Não, seria para todos os times, teoricamente, todos os times de atendimento: crédito, PF, conta digital, pagamentos. A gente trouxe logística também, que é um setor externo, app, cashback. A ideia é trazer o conhecimento de todos os times aqui, né? Quem saiba, todo mundo utilizar a plataforma e ser uma ferramenta de CRM também, de atendimento futuramente.
+
+Matheus Torquato [14:49]: E daí essa parte de permissões que você trouxe, É, acho que até interessante a gente começar a vincular isso com o convênio, porque assim, no convênio ele já traz para mim qual é a área desse colaborador. Aí ele já vem com a permissão do convênio, por isso assim, eu sei que esse cara ele trabalha em logística, por exemplo. Aí quando ele entra, não precisa nem setar permissão porque ele é de logística, então ele olha só essa aba de logística, por exemplo, não precisa olhar crédito. Essas permissões de uma forma automática. Exatamente. Eu acho que é até interessante a gente pensar nesse vínculo, convênio também.
+
+Diego Daniel Torini [15:30]: Perfeito. Hoje eu não tenho nenhuma integração e nem acesso a elas, né? Então eu fiz tudo dados mocados e quando a gente for criando acesso para visualização, validação da plataforma, eu vou fazendo manualmente. Mas eu acredito que é super válido.
+
+Matheus Torquato [15:45]: Vamos deixar automático. Quanto mais automático, melhor ainda. É melhor.
+
+Diego Daniel Torini [15:49]: Exato. Também tem até a identidade visual da Maísa, né, do chatbot. Então não tenho ela aplicada, só o nome mesmo, mas seria interessante a gente aplicar a identidade visual da própria Maísa aqui.
+
+Matheus Torquato [16:00]: É, fui eu que construí a Maísa, eu posso replicar aí.
+
+Diego Daniel Torini [16:03]: Boa, perfeito. E tem também a regra de negócio, né, que é algo que o Compa tá fazendo todo esse levantamento, que seria a nossa fonte de alimentação do hub. Então assim que ele finalizar todo esse projeto A gente poderia incluir também aqui dentro do painel do hub como uma fonte de alimento das informações. Além disso tudo, dos processos de cada time— perdão, pode seguir.
+
+Matheus Torquato [16:30]: Além do que eu pensei sobre o convênio, quais outras integrações você vê que a gente precisa ter? Porque o crédito ali, para liberar, ele precisa de uma integração, né?
+
+Diego Daniel Torini [16:39]: Isso, eu tenho uma documentação aqui meio por cima do cenário de app. Que é onde eu atuo e tenho um pouco de conhecimento do que é realizado no dia a dia, né. Então aqui dentro das integrações de app eu trouxe alguns sistemas da nossa base, né, Metabase, o motor Softnex, Retool, MyCash, MyCash 2.0, a Universe, que é cadastro de afiliados da Raia, Adem, Awin, Rakuten, se possível, que são lojas online, uma comunicação direto com eles. Aqui eu trouxe algumas plataformas que beneficiaria o time de app e acredito que afetaria algum, algo, outros times também, mas possivelmente os outros times, um exemplo, deixa eu abrir aqui.
+
+Matheus Torquato [17:25]: Isso tudo tem API, você sabe ou não? Esses outros eu nunca ouvi. Olhei o Notion, eu sei que eu consigo fazer integração, o Jira e tal, mas os outros, tá bom, beleza. Aí vai precisar correr atrás disso então.
+
+Diego Daniel Torini [17:38]: E acredito que outros times também usam alguma dessas ferramentas e podem até usar outras. Aí seria importante, depois que tiver tudo pré-estabelecido, né, a gente tiver o modelo de app funcionando, aí a gente pode, eu posso ir atrás conversando com os outros times quais são as ferramentas, os processos realizados no dia a dia, para a gente ir agregando também as operações deles.
+
+Matheus Torquato [18:03]: Perfeito, beleza.
+
+Diego Daniel Torini [18:08]: E além de todo esse processo de operações de conhecimento, ter uma própria base de conhecimento ali onde as pessoas podem ir agregando valor, né, incluindo vídeos, pessoas com acessos de administrador, né, além de poder usuários comuns também conseguir baixar todo o material de conhecimento, precisar enviar para algum afiliado ou algum parceiro, um exemplo.
+
+Matheus Torquato [18:31]: Beleza, entendi. Beleza, deixa eu ver se tem mais alguma outra dúvida. No convênio tem aquela parte de se o cara é N1, N2, N3, que daí é a hierarquia ali, né, de gestão. Esse painel você vê que toda empresa pode usar ou seria mais para um gestor ou alguém mais estratégico assim, tipo um cargo N2 para cima?
+
+Diego Daniel Torini [19:04]: Então, teoricamente, eu criei ele apenas para N1 no momento, né, porque é onde traciona o atendimento ali direto com afiliado. Então afiliado ele entra em contato sempre com N1, aí o N1 ali ele normalmente acessa algumas telas, 3 a 4 telas no dia ali para resolucionar ou identificar de fato um problema. Então não que isso seja impossibilitado de usar para o time de N2, N3 que seja, porém seria integrações com outras ferramentas também, né, Mixpanel, Jira.
+
+Matheus Torquato [19:33]: Beleza, é isso aí vai me ajudar na permissão lá. Quando a pessoa for entrar, ela só ser N1 e no setor. Daí se a pessoa é, porque do jeito que tá aí, qualquer pessoa que tiver o email da Mais Todos entra, né. Então daí a gente já fechar essa parte de quem vai ter permissão também. Daí fica automático, aí tipo, ah, beleza, tem um N3 lá que quer entrar, e daí você pega e seta ele, você dá liberação não manualmente, né, você libera o email dele, ele entra pelo dele, né. Isso, tá beleza.
+
+Diego Daniel Torini [20:07]: Aqui na própria gestão de acesso eu coloquei um campo de definição de N2, né, onde ele poderia visualizar o painel, Só que não tem de fato esse painel, ele não existe, né? Então a gente pode deixar ele em standby, esse processo de N2, que é realizado direto no Jira mesmo, atendimento.
+
+Matheus Torquato [20:29]: Beleza, vamos só ver um negócio rapidinho. Vamos fazer o seguinte então, eu vou pegar essa transação sem união que a gente fez, vou fazer uma documentação de como a gente vai seguir os próximos passos. Aí você enriquece ele até com essa documentação que você tem ali, as APIs. Você já conseguiu alguma API, já pode colocar na documentação ali também então.
+
+Diego Daniel Torini [20:58]: Beleza.
+
+Matheus Torquato [20:59]: Na verdade nem é interessante colocar porque vai no chat do Cláudio, melhor você mandar no Slack.
+
+Diego Daniel Torini [21:05]: Não tenho nenhuma também.
+
+Matheus Torquato [21:08]: A gente corre atrás, não tem problema.
+
+Diego Daniel Torini [21:11]: Beleza.
+
+Matheus Torquato [21:11]: Aí é um trabalho ali mais de formiga mesmo. Mas a gente faz. E aí você já me mandou essas pastas zipadas, daí eu já pego, já vou hospedar aqui no GitHub. Você vai me mandar os emails que você quer que eu convite como colaborador, eu já mando também ali convidando.
+
+Diego Daniel Torini [21:28]: Perfeito.
+
+Matheus Torquato [21:29]: E daí eu já vou conversar ali com o pessoal de infra para liberar banco de dados para gente e começar a construção. Boa. Só que eu preciso desse documento daí depois que eu vou te mandar, e você detalhar bem ele, sabe? Tipo, com tudo ali, cada aba faz tal. Que é legal também, que daria para você fazer, acho que é super interessante, é você até no próprio Loveable dá para fazer isso. Você pede para o Loveable fazer um resumo do sistema, como ele funciona, qual é a ideia. Você joga manual da plataforma, joga no cloud junto com a documentação que eu vou te mandar, e você enriquece ali um documento único para mim, sabe? Acho que isso aí é bem interessante.
+
+Diego Daniel Torini [22:08]: Boa, tranquilo. Isso aí, acredito que você mandando essa documentação já consigo te retornar ela hoje ainda.
+
+Matheus Torquato [22:16]: Beleza, beleza. E você tem algum prazo para entregar isso aí? Como é que tá, cara?
+
+Diego Daniel Torini [22:22]: Então a gente tem esse mês aí, até o final do mês. A ideia é o projeto tá funcionando, rodando para validação de todos os times, né? Então o Compa tá nesse processo também de alimentar essa regra de negócio onde ele tá coletando todos os dados. E eu também, querendo ou não, dependo dessa regra de negócio dele pronta, dessa fonte pronta para a gente se alimentar dela, né, dentro do painel. Então também é algo que ele tá me ajudando a tocar esse projeto. Então estamos tracionando aos poucos, agora estamos barrados basicamente na validação do time de segurança para seguir. Porém agora acredito com você, a gente consegue seguir de uma forma mais eficiente, né? Você já tem todos os processos. Tudo certinho.
+
+Matheus Torquato [23:02]: É, beleza. Aí eu só vou pedir também para você pensar um domínio. Tem que ser só tipo, por exemplo, dashboard.maistodos.br. Tem que ter o .maistodos.br por causa que é o domínio da Mais Todos. Então você pensa nesse nome antes, tipo, não dashboard, né, mas um outro nome.
+
+Diego Daniel Torini [23:19]: Se não tiver, se tiver disponível também um hub Mais Todos, igual é a ideia do nome do projeto, que é um hub centralizador, né.
+
+Matheus Torquato [23:26]: Pode ser. Aí eu vou solicitar para o menino fazer aqui um domínio, que daí eu coloco um dockploy aqui. Aí isso pode estar na documentação, tá? Tá, beleza. Esse domínio, que daí eu já corro atrás para o menino fazer ali, bem tranquilo.
+
+Diego Daniel Torini [23:40]: Fechou então. Aí eu só te libero um acesso de admin aqui dentro do painel. Que mais você precisaria? Te mandei o code que eu extraí já hoje mais cedo.
+
+Matheus Torquato [23:50]: Não vou nem precisar do acesso porque Como você me passou as passas, eu já vou hospedar aqui. Aí eu posso eu mesmo fazer um acesso para mim aqui, tipo assim, não vou usar esse domínio teu, entendeu?
+
+Diego Daniel Torini [24:03]: Eu te mandei também um link do que o Compa publicou no Git. Eu não sei se é o mesmo Git que vocês compartilham.
+
+Matheus Torquato [24:11]: Eu acho que não, porque eu acabei de criar o meu faz tipo 5 minutos. Não, não tinha esse, esse meio antes. E eu acabei de criar. Deixa eu entrar aqui para ver.
+
+Diego Daniel Torini [24:22]: Não, sem problema então.
+
+Matheus Torquato [24:34]: Não, ele não tem, não é o mesmo.
+
+Diego Daniel Torini [24:44]: Então beleza. Eu vou falar para ele também que a gente tá seguindo aqui, que dessa forma a gente nem fica travado no time de segurança, né, que eles me deram um prazo para segunda-feira que vem da análise. Então eles me retornariam com que eu teria que corrigir para depois passar para eles de novo, validar o que foi corrigido, e isso postergando cada vez mais. Então já com você a gente nem precisaria passar com eles, né?
+
+Matheus Torquato [25:06]: Não, não, a gente vai mais rápido aqui, entendeu? Já tem um processo.
+
+Diego Daniel Torini [25:11]: Fechou, beleza. Aí qualquer coisa você precisar pode mandar que eu já, a prioridade é toda minha aqui nesse caso.
+
+Matheus Torquato [25:19]: Fechou, valeu, Diego. Vou mandar, vou fazer agora o documento, já te mando.
+
+Diego Daniel Torini [25:21]: Fechado, brigadão, hein, Matheus. Valeu, até.
