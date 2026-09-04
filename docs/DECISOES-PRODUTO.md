@@ -16,7 +16,7 @@
 | Login | Google Workspace restrito a `@maistodos.com.br`. Foi assim que 16 das 18 contas do protótipo entraram. Sem login isolado |
 | IdP central | Não confirmado se existe Azure AD/Okta além do Google Workspace — quem responde é a Infra |
 | Fonte da permissão | **Convenia**, definindo setor e nível automaticamente. Sem configuração manual como regra |
-| Sincronização | No login + varredura diária de madrugada para pegar desligamento. Webhook, se existir, é melhoria — não trava o desenvolvimento |
+| Sincronização | ⚠️ **Corrigido em 03/09** — ver 1.1. Não é possível sincronizar no login: a Convenia não tem busca por e-mail. Cron varre e espelha; o login lê só o banco |
 | Domínio | `hub.maistodos.com.br` — **DECIDIDO** |
 
 ### Desligamento e mudança de setor
@@ -26,6 +26,43 @@
 **PROPOSTA do Diego** (mudança de setor): permissão automática recalculada na hora, liberação manual continua valendo mas **aparece sinalizada na tela de acessos** para o admin revisar. Motivo: ninguém perde acesso no meio de um atendimento por ter mudado de área, e a exceção não fica esquecida para sempre.
 
 > ✅ **Aceito, com um reforço:** toda exceção manual nasce com **prazo de validade** (sugestão: 90 dias) e uma data de revisão. A sinalização resolve o "esquecida para sempre" só se alguém olhar a tela; o prazo resolve mesmo que ninguém olhe. Expirou, cai sozinha — e o admin reconcede em dois cliques se ainda fizer sentido.
+
+### 1.1 ⚠️ Correção: a sincronização no login não existe
+
+A regra aprovada era "sincronizar no login + varredura diária". **Metade dela é impossível**, e isso foi
+descoberto no contrato real da API (documento `INTEGRACAO_CONVENIA_E_MAISA.md`, extraído do código em
+produção do Hub P&C).
+
+**Motivo:** a Convenia **não tem endpoint de busca por e-mail**. Só existe `GET /employees/{id}` (exige já
+ter o id) ou `GET /employees` paginado — 17 páginas para 330 pessoas. Consultar a Convenia a cada login
+significaria 17 chamadas por pessoa que entra, e o rate limit derruba na terceira.
+
+**Desenho correto:**
+
+```
+Cron periódico (2× ao dia)  →  varre a Convenia inteira  →  espelha no banco do Hub
+Login do usuário            →  lê SÓ o banco do Hub      →  zero chamadas à Convenia
+```
+
+O efeito prático para o usuário é o mesmo: a permissão continua automática e continua atualizada. Só não
+é buscada no instante do login. **Não muda nada do que foi combinado com o Diego** — muda como se implementa.
+
+### 1.2 ⚠️ O enum de níveis tem cinco valores, não três
+
+O dado real da Convenia usa: **`N0`, `N1`, `N2-L`, `N2`, `N3`**. A regra que fechamos previa só N1/N2/N3,
+então `N0` e `N2-L` (liderança de nível 2) cairiam no vazio.
+
+**Proposta:** `N0` e `N2-L` seguem a mesma regra de N2/N3 — veem a trilha de auditoria, não operam.
+Nível fora do enum é descartado, nunca vira permissão (o RH digita livre na Convenia, e erro de digitação
+não pode virar acesso).
+
+### 1.3 🔴 Logística não existe na Convenia
+
+O Hub tem "Logística" como área de operação. **Nenhum dos 43 setores da Convenia é Logística** — o mais
+próximo é `Supply Chain`. Isso é coerente com o handoff, que descreve Logística como *"setor externo"*.
+
+✅ **RESOLVIDO em 03/09.** O Diego validou com o próprio time: **Logística = `Supply Chain`** na Convenia.
+Permissão automática funciona normalmente, sem exceção manual.
 
 ### Papéis
 
@@ -90,6 +127,50 @@ Fora do MVP: Jira, Zendesk, Metabase, Motor, Softnex, Univers, Adyen, Awin, Raku
 
 > 🆕 **Solatio não constava na lista de integrações do handoff.** Entra no mapa de sistemas.
 > 📌 Os contratos estão detalhados **na versão Markdown do handoff técnico**, que ainda não recebi — só tenho o PDF. Pedido registrado.
+
+### Contratos de API — recebidos em 03/09
+
+Chegaram na versão Markdown do handoff (v1.1). São os endpoints usados hoje pelo N1 do App.
+
+**Busca de filiado**
+```
+GET https://api.cartaodetodos.com.br/api/filiado/{cpf}/ctn
+Auth: token de portador
+```
+
+**Support API** — base `https://wallet.maistodos.com.br/api/`, **autenticação básica com usuário de suporte**
+
+| Operação | Chamada |
+|---|---|
+| Atualizar contato | `PATCH /v1/admin/support/{cpf}/contact` — e-mail e telefone; valor nulo **remove** o contato |
+| Ativar/desativar conta | `PATCH .../account/status/{cpf}` — ação `enable` ou `disable` |
+| Alterar documento | `PATCH .../user/{cpf_antigo}/document` |
+| Estorno | `POST .../transaction/{id}/refund` — sem corpo |
+| Data de liquidação | `PATCH .../transaction/{id}` — com a nova data |
+| Segunda via de private label | `POST .../private-label/user/{documento}` |
+| Sincronização CDT | `PATCH .../support/{documento}` — retorna `405`, **não confirmado** |
+
+**Consulta de cashback**
+```
+GET https://server.solatioenergialivre.com.br/ProspectorAPI/Cashback
+Params: intervalo de datas (mês/dia/ano) + CPF
+Estados: pendente · autorizado · expirado · morto · cancelado
+```
+
+**Liberação de cashback** — continua sendo o único ponto cego: roda em lote por um workflow do Retool,
+identificado por um código de fluxo, com o CPF no gatilho. **Qual API ele chama por trás segue desconhecido.**
+
+**Metabase** — consulta por `POST /api/dataset` com chave de API. Banco central de filiados, transações e campanhas.
+
+> 🔴 **Risco de auditoria que esses contratos revelam.** A Support API autentica por **usuário de suporte
+> compartilhado**, com senha básica. Se o Hub usar essa mesma credencial, **toda ação executada aparecerá
+> no sistema de destino como "usuário de suporte"** — não como o atendente que a executou. A trilha do Hub
+> sabe quem foi; o sistema que recebeu a ação, não. Isso enfraquece justamente a auditoria que é o coração
+> do projeto.
+>
+> **Encaminhamento proposto:** pedir uma **credencial de serviço dedicada ao Hub** (não o usuário humano de
+> suporte) e verificar se a API aceita um cabeçalho identificando o atendente. Se não aceitar, registrar a
+> limitação de forma explícita — é decisão consciente, não descuido.
 
 ### Notion — espaços a sincronizar
 
@@ -288,12 +369,262 @@ Consolidada pelo Diego. Nenhum desses acessos é dele para conceder. **Proposta 
 
 ---
 
-## 12. Seguem sem resposta
+## 12. De-para de setores — rascunho para validar
 
-Duas perguntas foram acrescentadas depois que o Diego já tinha escrito o retorno, então ainda não foram respondidas:
+Os **43 setores literais** da Convenia estão documentados. As áreas de operação do Hub são seis. A proposta
+abaixo é rascunho técnico: **quem valida é o Diego.**
 
-- **D-38** — Já existe outro sistema chamado "Hub MaisTODOS" (o portal de colaboradores em `astronauta.maistodos.com.br`). Vale diferenciar o nome?
-- **D-39** — Aquele portal expõe 15 campos de colaborador por API ao time de Segurança/Acessos. Serve como fonte alternativa ao Convenia, ou como atalho enquanto o acesso ao Convenia não sai?
+### Regra estruturante proposta
+
+> **Só `CX` e `CS` recebem permissão de operação automática.** São os times que atendem o filiado
+> diretamente. `Produto`, `Tech`, `Comercial` e os demais recebem **conteúdo**, que já é aberto a todos,
+> mas não operam. Quem precisar operar sem ser CX/CS entra por exceção manual.
+
+Isso resolve o de-para sem inventar regra: o prefixo do setor já carrega a função.
+
+| Setor na Convenia | Área do Hub | Opera? |
+|---|---|---|
+| `CX - APP CDT` | app | ✅ |
+| `CX - Conta Digital` | conta-digital | ✅ |
+| `CX - Crédito PF` | credito-pf | ✅ |
+| `CX - Pagamentos` | pagamentos | ✅ |
+| `CS - Banking` | conta-digital | ✅ |
+| `CS - Cashback` | cashback | ✅ |
+| `CS - Crédito` | credito-pf | ✅ |
+| `CS - Pagamentos` | pagamentos | ✅ |
+| `Comercial - Cashback` | cashback | ❌ **só consulta por ora** — entra quando a operação do App estiver validada |
+| `Supply Chain` | **logistica** | ✅ **confirmado pelo time de Logística** |
+| `Crédito PJ` | **credito-pj** 🆕 | ❌ **nova área, só consulta** — definida quando houver conteúdo no Notion |
+| `Prevenção à Fraude` | — | ❌ só conteúdo |
+| `APP - Produto`, `Produto - *`, `Tech - *`, `Crédito - *`, `Crédito PF`, `Crédito PJ` | — | ❌ só conteúdo |
+| `BI`, `Business Analytics`, `CRM`, `Diretoria`, `Financeiro`, `FP&A`, `Growth`, `Marketing`, `Melhoria Contínua`, `Pessoas e Cultura`, `QA`, `Segurança Da Informação`, `SRE`, `Tecnologia e Dados`, `UX/UI` | — | ❌ só conteúdo |
+| `Marketing, CRM, Growth, CX e Operações App e Cashback` | ❓ | ❓ nome é uma frase inteira, resíduo de diretoria no campo errado |
+
+**Status das perguntas — 03/09:**
+
+1. ✅ **`Crédito PJ` vira área nova no Hub**, de consulta. Será definida assim que a sincronização com o
+   Notion trouxer conteúdo do time. Não opera no MVP.
+2. ✅ **`Comercial - Cashback` só consulta** por ora. A intenção é trazer todas as operações para a
+   plataforma depois que a operação do App estiver validada.
+3. ⏳ **`Marketing, CRM, Growth, CX e Operações App e Cashback`** — o Diego devolveu a pergunta: esse setor
+   tem pessoas vinculadas? Tem ramificações? **É pergunta de dado, não de opinião** — a resposta sai de uma
+   consulta à Convenia (`GET /departments` + contagem de colaboradores nesse `department`). Enquanto não
+   medirmos: **leitor de conteúdo apenas**, conforme ele propôs.
+
+> 🔑 **A regra confirmada pelo Diego, na palavra dele:** *"todos os times podem visualizar conteúdo de
+> processos de todas as áreas, a única trava seria executar as tarefas do fluxo operacional — aí somente
+> os correspondentes de cada time."* É exatamente a regra CX/CS proposta.
+
+**Regra de implementação:** o de-para vive como **tabela de dados**, uma linha por string literal, nunca
+como `if/else` no código. Setor novo aparece sem aviso na Convenia, e sem tabela ele cai num `default`
+silencioso. Setor não mapeado = **sem operação, com conteúdo** — falha para o lado seguro.
+
+---
+
+## 11.B 🔴 Consulta real à Convenia — 03/09/2026
+
+Rodei a API da Convenia com o token das três empresas para responder a pergunta do Diego sobre o setor
+`Marketing, CRM, Growth, CX e Operações App e Cashback`. **A resposta é "não existe" — e o resto do que
+apareceu muda o de-para inteiro.**
+
+**Base medida:** 307 colaboradores · CredTodos 219 · GanhaTodos 47 · PagTodos 41 · 269 ativos, 38 de férias.
+
+### 11.B.1 A lista de setores mudou. São 21, não 43
+
+O documento do Hub P&C trazia 43 setores, com o produto embutido no nome (`CX - Pagamentos`,
+`CX - Conta Digital`, `CX - APP CDT`…). **Esses setores não existem mais.** A MaisTODOS reestruturou:
+
+| Nº | Setor | Pessoas |
+|---|---|---|
+| 1 | Tecnologia | 109 |
+| 2 | **CX, Ops e Atendimento ao Cliente** | **32** |
+| 3 | Comercial - Transações Financeiras PF | 19 |
+| 4 | Pessoas e Cultura | 18 |
+| 5 | Produto | 16 |
+| 6 | Financeiro | 12 |
+| 7 | Risco de Crédito e Cobrança | 11 |
+| 8 | Diretoria | 10 |
+| 9 | Design | 9 |
+| 10 | Prevenção à Fraudes | 9 |
+| 11 | Marketing | 8 |
+| 12 | Dados | 8 |
+| 13 | Segurança da Informação | 8 |
+| 14 | Inteligência de Negócios | 7 |
+| 15 | CS - Cashback | 7 |
+| 16 | CRM | 5 |
+| 17 | FP&A | 5 |
+| 18 | Comercial - Cashback | 5 |
+| 19 | Comercial - Transações Financeiras PJ | 4 |
+| 20 | **Supply Chain** | **4** |
+| 21 | Jurídico | 1 |
+
+**Todo o atendimento vive num setor só:** `CX, Ops e Atendimento ao Cliente`, com 32 pessoas. O setor
+**não diz mais qual produto a pessoa atende** — e o cargo também não: são "Analista de Atendimento Jr" (15),
+"Analista de Suporte Técnico Jr", "Analista de Operações". Nenhum menciona App, Cashback, Conta Digital
+ou Pagamentos. O campo `team` também não ajuda: só existem três valores — Tech (133), Negócios (130) e
+vazio (44).
+
+> ✅ **`Marketing, CRM, Growth, CX e Operações App e Cashback` tem ZERO pessoas.** Não é setor, é resíduo.
+> Provavelmente virou a Diretoria `MKT, CRM, OPS & CX`. **Pode ser descartado do de-para.**
+
+### 11.B.2 ✅ Existe um campo que resolve: `Produto`
+
+O de-para não está morto — só não está onde a documentação dizia. Nos campos personalizados existe um
+campo **`Produto`**, e ele carrega exatamente a área de operação do Hub:
+
+```
+Crédito PF · Crédito PJ · Conta Digital · Pagamentos
+```
+
+E ele é **multi-valor**: a mesma pessoa pode ter `"Crédito PF, Crédito PJ"` ou `"Crédito PJ, Conta Digital"`.
+Isso encaixa perfeitamente no modelo de `user_area_access` do Hub, que já é uma permissão por área, não uma
+área única por pessoa.
+
+Junto vêm outros dois campos úteis:
+- **`Tipo de área`**: `Alocada` ou `Cross` — quem é Cross atende mais de uma área;
+- **`Diretoria`**: no time de atendimento, todos são `MKT, CRM, OPS & CX`.
+
+> ⚠️ **O custo disso:** `Produto` é campo personalizado, e campo personalizado **só existe no endpoint de
+> detalhe** — uma chamada por pessoa. Confirma o desenho de cron + espelho, e reforça que a permissão
+> nunca pode ser buscada no login.
+
+**Ainda falta medir:** os valores completos de `Produto` nas 307 pessoas. A amostra de 8 mostrou quatro
+valores, mas App, Cashback e Logística ainda não apareceram — pode ser só a amostra, pode ser que esses
+times usem outro rótulo. Isso se resolve com um levantamento completo, não com pergunta.
+
+### 11.B.3 🔴 O "N1" do projeto NÃO é o N1 da Convenia
+
+Este é o achado mais importante, e ele contradiz uma premissa que já estava fechada.
+
+O projeto inteiro diz *"o MVP é o N1, que atende o filiado diretamente"*. Mas na Convenia, medido:
+
+| Cargo real | Nível na Convenia |
+|---|---|
+| Analista de Atendimento Jr | **N3** |
+| Analista de Operações Jr / Pl | **N3** |
+| Coordenador de Atendimento | **N2-L** |
+| Coordenador de Operações e Suporte Técnico | **N2-L** |
+| Gerente de Operações e Customer Experience | **N2-L** |
+
+São **duas escalas opostas com os mesmos nomes**:
+
+- **No atendimento**, N1 é o primeiro nível de suporte — quem fala com o filiado. N2 e N3 são escalonamento.
+- **Na Convenia**, o nível é hierárquico e desce: N0/N1 no topo, `N2-L` para liderança, **N3 para a base**.
+
+> 🔴 **Se mapearmos "N1 da Convenia → opera atendimento", o Hub vai liberar operação para a diretoria e
+> negar para os atendentes.** Exatamente o contrário do que o Diego pediu.
+
+**Correção proposta:** a permissão de operação **não deve ser derivada do nível**. Ela sai do campo
+`Produto` (a área) combinado com o setor `CX, Ops e Atendimento ao Cliente` (a função). O nível serve para
+distinguir **quem lidera** — `N2-L` vê a trilha de auditoria do time — não para dizer quem opera.
+
+Precisa de confirmação do Diego, mas o dado é claro.
+
+### 11.B.4 Outros achados operacionais da mesma consulta
+
+- **`GET /departments` responde 404.** O catálogo de setores documentado não existe nesta API. A lista sai
+  da paginação de `/employees` mesmo.
+- **A Convenia está atrás de Cloudflare** e bloqueia cliente sem `User-Agent` de navegador (erro 1010).
+  Sem isso, toda chamada volta `403` e parece problema de credencial.
+- **3 pessoas sem e-mail corporativo** — confirma a necessidade da fila de pendentes.
+- **Todos têm gestor preenchido** (0 sem `supervisor`), o que facilita a resolução em duas passadas.
+- ⚠️ **O detalhe traz `Numero SUS`** — número do cartão do SUS, dado pessoal sensível de saúde. **Não deve
+  ser espelhado no Hub em hipótese alguma.** O sync tem que ter allowlist de campos, não copiar o objeto
+  inteiro.
+
+---
+
+## 11.C ✅ De-para fechado — levantamento completo (307 pessoas, 04/09/2026)
+
+Busquei o campo `Produto` de **todas as 307 pessoas** das três empresas. O de-para está resolvido.
+
+### 11.C.1 Os valores reais de `Produto`
+
+| Valor | Pessoas | Área do Hub |
+|---|---|---|
+| *(vazio)* | 120 | — |
+| **Crédito PF** | 53 | `credito-pf` |
+| **App** | 38 | `app` |
+| **Cashback** | 38 | `cashback` |
+| **Pagamentos** | 21 | `pagamentos` |
+| **Conta Digital** | 20 | `conta-digital` |
+| **Crédito PJ** | 14 | `credito-pj` 🆕 |
+| Plataforma | 10 | — não é área do Hub |
+| Sondas | 8 | — não é área do Hub |
+
+**As seis áreas do Hub aparecem**, com a nomenclatura idêntica à do painel. O de-para é praticamente 1:1 —
+não precisa de tradução, só de normalização de acento e caixa.
+
+### 11.C.2 A regra final
+
+> **Área de operação = campo `Produto`** (multi-valor, separado por vírgula), **quando preenchido.**
+> **Exceção:** `Supply Chain` → `logistica`. As 4 pessoas do setor têm `Produto` vazio, então a Logística
+> se resolve pelo setor, não pelo produto.
+> **Quem opera** = setor `CX, Ops e Atendimento ao Cliente` ou `CS - Cashback`, **com `Produto` preenchido.**
+> `Plataforma` e `Sondas` não são áreas do Hub e são ignorados.
+
+### 11.C.3 O time de atendimento, pessoa a pessoa
+
+`CX, Ops e Atendimento ao Cliente` — 32 pessoas:
+
+| `Produto` | Pessoas |
+|---|---|
+| *(vazio)* | **10** ⚠️ |
+| Pagamentos | 5 |
+| App | 5 |
+| Crédito PF | 4 |
+| Crédito PF, Crédito PJ | 3 |
+| Conta Digital | 2 |
+| Cashback | 2 |
+| Crédito PJ, Conta Digital | 1 |
+
+`CS - Cashback` — 7 pessoas: 6 em `Cashback`, 1 em `App`.
+
+**Tipo de área no atendimento:** Alocada 20 · Cross 7 · Fixa 5.
+
+> ⚠️ **Ação concreta para o Diego:** **10 das 32 pessoas do atendimento estão com `Produto` vazio na
+> Convenia.** Elas não receberão permissão de operação automática. Não é problema do Hub — é cadastro
+> incompleto no RH, e é uma lista pequena e resolvível. **Pedir ao RH que preencha o `Produto` dessas 10
+> pessoas** é mais barato que construir exceção manual para cada uma.
+
+### 11.C.4 A escala de níveis, medida nas 307 pessoas
+
+| Nível | Pessoas |
+|---|---|
+| **N3** | **217** |
+| N2-L | 50 |
+| N2 | 28 |
+| N1 | 8 |
+| N0 | 2 |
+| *(vazio)* | 1 |
+| `Especialização - pos graduado` | 1 ⚠️ lixo de digitação |
+
+Confirma o que a amostra já indicava: **N3 é a base da pirâmide (217 de 307)** e N1 são 8 pessoas no topo.
+O "N1" do jargão de atendimento não tem relação com o N1 da Convenia.
+
+E confirma a regra de descartar valor fora do enum: existe uma pessoa com `Especialização - pos graduado`
+no campo Nível. O RH digita livre, e erro de digitação **nunca pode virar permissão**.
+
+### 11.C.5 Diretorias reais (307 pessoas)
+
+Tecnologia & Dados 109 · MKT, CRM, OPS & CX 45 · Finanças 40 · Produto & Design 25 ·
+Transações Financeiras 22 · Gov. de Seg. Inf. & Compliance 17 · Pessoas & Cultura 16 · Lealdade 12 ·
+Diretoria 10 · Sondas 9 · vazio 2.
+
+O atendimento inteiro vive sob `MKT, CRM, OPS & CX` — que é, quase certamente, o que virou aquele setor
+de nome-frase da documentação antiga.
+
+---
+
+## 12. Resolvidos fora do documento
+
+- **D-38 — Colisão de nome:** ✅ sem impacto. O portal do Hub é **outro projeto**, hospedado no domínio do
+  astronauta. Não há conflito de endereço. **`hub.maistodos.com.br` confirmado para o Hub do Diego.**
+- **D-39 — API de colaboradores do portal:** ❌ descartado. O Convenia resolve melhor e com contrato completo.
+- **D-25 / Logo e identidade:** ✅ a Adabtech tem o material e envia. O handoff v1.1 confirma o oficial:
+  roxo **`#7600D6`**, verde **`#54B900`** só para sucesso, fundo escuro **`#22023C`** e nunca preto,
+  proporção 70/20/10, tipografia **Lexend**. Logos vivem em `src/assets/brand/` — **pasta que não veio no
+  export do Lovable**, por isso o arquivo original é necessário.
 
 ---
 

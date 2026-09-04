@@ -65,6 +65,70 @@ Isso **derruba D-25, D-29 e boa parte de D-08** da lista do Diego, e reduz a lis
 
 ---
 
+### 0.7 📗 O handoff do Hub P&C resolveu Convenia e Maísa
+
+Chegou `INTEGRACAO_CONVENIA_E_MAISA.md` — contratos extraídos do **código em produção** do Hub P&C
+(`hub-pec`), não de documentação. Resolve Q-01, Q-02 e Q-03 de uma vez, e traz 10 armadilhas já pagas.
+
+**Convenia — o essencial:**
+
+| Item | Valor |
+|---|---|
+| Base URL | `https://public-api.convenia.com.br/api/v3` |
+| Auth | token fixo, header `token: {TOKEN}` + `Accept: application/json` |
+| Sandbox | ❌ **não existe.** Só produção — `GET` é a única operação segura |
+| Rate limit | `429` após ~47 chamadas. Pausa **350–400 ms**, backoff 5× |
+| Multi-tenant | **3 empresas**: CredTodos, GanhaTodos, PagTodos — token por empresa |
+| Escopo de token | Token capado esconde CPF, endereço, matrícula e `/dismissed`. **Pedir os três com escopo completo** |
+| Diagnóstico | `GET /api/v3/tokens/permissions` diz o que o token enxerga |
+
+**Cinco coisas que mudam o desenho:**
+
+1. **Não existe busca por e-mail** → a sincronização no login é impossível. Vira cron + espelho no banco.
+   Corrigido em `DECISOES-PRODUTO.md` 1.1.
+2. **`custom_fields` (Nível, Diretoria) só existem no endpoint de detalhe** → N+1 chamadas, uma por
+   pessoa. Com 330 pessoas e pausa de 400 ms são ~2,5 min por rodada. **Não cabe num worker serverless** —
+   e o Hub P&C perdeu 8 dias parado exatamente por isso, sem log, com o cron reportando "success".
+3. **Não existe status "Desligado"** — quem sai simplesmente some da listagem. Detecção por
+   `/employees/dismissed` (exige token RH) **+ diff da listagem**. Os dois juntos, não um ou outro.
+4. **`supervisor` devolve id, não e-mail**, e o gestor pode vir depois do liderado → resolver em duas
+   passadas. Gestor removido tem que **limpar** o campo, senão vira gestor fantasma vendo trilha de time
+   que não é mais dele.
+5. **`email` pode ser `null`** (terceirizado, admissão em andamento) → fila visível ao admin, e conta
+   criada com acesso barrado até aprovação. Sem isso, cadastro de teste da Convenia vira usuário real.
+
+**A pendência de segurança herdada:** a assinatura HMAC do webhook **nunca foi validada** — o endpoint do
+Hub P&C roda em modo observação, aceitando evento de qualquer origem. Não replicar sem resolver.
+**Pergunta obrigatória para a Convenia:** qual é a fórmula exata do header `signature` — o que entra na
+mensagem e qual é o segredo.
+
+**Maísa — a resposta é uma terceira opção:**
+
+Ela **não é serviço nem RAG**. É *prompt + o corpus inteiro injetado no contexto a cada pergunta*.
+Google **Gemini 2.5 Flash**, temperature `0.3`, `maxOutputTokens` 2048, stateless com as últimas 6
+mensagens. **Zero embedding, zero chunking, zero vetor.**
+
+> 🔑 **Isso não escala para o Hub.** Funciona no P&C porque o corpus são algumas dezenas de páginas de RH.
+> O Hub sincroniza **11 workspaces do Notion** — não cabe no contexto, e pagar o corpus inteiro em toda
+> pergunta fica caro. **O RAG vai ser construído, e a decisão de embedding é nossa, não herdada.**
+> Recomendação: `text-embedding-004` (768 dimensões) mantém tudo no Google, junto do Gemini.
+> Gravar o **nome do modelo** na linha do chunk desde o dia 1 permite reindexar em paralelo depois.
+
+E há um ganho de graça: os **guardrails da Maísa já estão escritos e testados em produção** — nunca citar
+termo que não esteja literal no contexto, nunca prometer link, tema amplo lista só títulos, relevância
+estrita ("férias" ≠ "feriados"), e bloco anti prompt-injection. Mais dois incidentes reais que valem como
+requisito: card vazio faz o modelo **inventar** (a correção é *nomear a lacuna* no contexto, não esconder),
+e o rebuild da KB ingeriu área restrita (a correção é **filtrar na ingestão e reforçar no prompt** — uma
+camada só não basta).
+
+**⚠️ Divergência de marca a resolver:** o protótipo do Diego usa roxo `#7600D6` e magenta `#D0007A`;
+o Hub P&C em produção usa `#7200d6` e `#e5087e`. São valores diferentes. Sem o manual de marca, os dois
+sistemas ficam com roxos ligeiramente distintos lado a lado.
+
+---
+
+---
+
 ## Parte R — Pontos que precisam da sua resposta
 
 **R-01 — O cliente pediu o controle de custo de IA que você dispensou.**
@@ -89,24 +153,48 @@ O Diego propôs vídeo hospedado no Drive ou YouTube não listado, com o Hub gua
 
 Depois de ler transcrição, handoff, briefing, código, ambiente e o retorno do Diego, o projeto está entendido. O que resta é isto — e é pouco:
 
-**Q-01 — A sua integração do Convenia acessa a conta da MaisTODOS?**
-Se sim, você tira a lista de setores sozinho e o de-para deixa de ser pendência. Se for integração genérica (você conhece a API, mas com credencial de outro cliente), a lista de setores da MaisTODOS continua sendo pedido ao RH. É a única coisa que separa "Convenia resolvido" de "Convenia quase resolvido".
+~~**Q-01 — Convenia**~~ ✅ **resolvido.** Contrato completo, 43 setores literais, 7 diretorias, 5 níveis.
+Resta obter os **tokens das 3 empresas com escopo completo** e perguntar à Convenia a fórmula do HMAC.
 
-**Q-02 — Qual IA a Maísa usa, e qual embedding?**
-Você disse ter todas as especificações. Preciso de: provedor e modelo do chat, e **modelo + dimensão do vetor** do embedding. A dimensão tem que estar fechada antes de eu criar a tabela de chunks — trocar depois obriga reindexar tudo.
+~~**Q-02 — Modelo da Maísa**~~ ✅ **resolvido.** Gemini 2.5 Flash. Embedding: não existe hoje, **decisão nossa** — recomendo `text-embedding-004`, 768 dimensões.
 
-**Q-03 — A Maísa que já existe é reaproveitável como serviço, ou só a identidade?**
-Muda o desenho: se a Maísa já roda como serviço (com base própria, endpoint, prompt), o Hub pode consumir em vez de reconstruir o RAG do zero. Se for só identidade visual e tom de voz, o pipeline de embedding + busca vetorial é nosso.
+~~**Q-03 — Maísa é serviço?**~~ ✅ **resolvido.** Não é. É prompt + corpus no contexto. **O RAG do Hub é construção nova.**
+
+~~**Q-08 — Logística na Convenia**~~ ✅ **resolvido.** O Diego validou com o time: é `Supply Chain`.
+Permissão automática funciona, sem exceção manual.
+
+**Q-11 🆕 — Uma consulta que responde uma pergunta do Diego.** Ele devolveu a dúvida sobre o setor
+`Marketing, CRM, Growth, CX e Operações App e Cashback`: tem gente vinculada? tem ramificação? Isso se
+responde com **dado, não com opinião** — `GET /api/v3/departments` + contagem de colaboradores nesse
+`department`, com o token que você já tem. Vale rodar e devolver a resposta pronta para ele.
+
+~~**Q-09 — Divergência de hex da marca**~~ ✅ **resolvido.** O handoff v1.1 confirma como oficial:
+roxo **`#7600D6`**, verde **`#54B900`** só para sucesso, escuro **`#22023C`**, nunca preto, 70/20/10,
+tipografia **Lexend**. O `#7200d6` do Hub P&C é que está fora do padrão. Fica valendo o do protótipo.
+⚠️ Os logos oficiais vivem em `src/assets/brand/` — **pasta que não veio no export do Lovable**. O arquivo
+segue sendo necessário (você já tem, é só enviar).
+
+~~**Q-07 — D-38 e D-39**~~ ✅ **resolvidos.** O portal do Hub é outro projeto e fica no domínio do
+astronauta, então não há colisão de endereço — **`hub.maistodos.com.br` está confirmado para nós**.
+O D-39 (API de colaboradores daquele portal) fica descartado: o Convenia resolve melhor.
 
 **Q-04 — Bucket: R2, Wasabi ou S3?** (item 10, segue em aberto)
 
 **Q-05 — Quem vai atrás do Retool?**
 É o único bloqueio real da Fase 3. O Diego não tem acesso de edição para exportar o fluxo, e ninguém sabe qual API ele chama por trás. O caminho proposto por ele é o Compa. Você aciona, ou deixa na lista que ele vai levar?
 
-**Q-06 — Pedir a versão Markdown do handoff.**
-O PDF diz que os contratos de API estão nela (busca por CPF, atualização de contato, ativação/desativação, alteração de documento, estorno, data de liquidação, segunda via de PL, consulta de cashback). Custa uma mensagem e pode economizar dias.
+~~**Q-06 — Versão Markdown do handoff**~~ ✅ **recebida** (v1.1, 03/09). Contratos em `DECISOES-PRODUTO.md`.
+Dois sistemas que não estavam em nenhum mapa apareceram: **`api.cartaodetodos.com.br`** (busca de filiado)
+e **`wallet.maistodos.com.br`** (Support API — contato, status de conta, documento, estorno, liquidação,
+private label). Mais o **Metabase** por `POST /api/dataset`.
 
-**Q-07 — D-38 e D-39 seguem sem resposta.** O outro "Hub MaisTODOS" (`astronauta`) e a API de 15 campos de colaborador daquele portal. O D-39 pode inclusive ficar irrelevante se o Q-01 resolver o Convenia.
+**Q-10 🔴 — Credencial compartilhada na Support API.** A Support API autentica por **usuário de suporte
+com senha básica**. Se o Hub usar a mesma credencial, toda ação vai aparecer no sistema de destino como
+"usuário de suporte", não como o atendente. A trilha do Hub sabe quem foi; o sistema que recebeu a ação,
+não — e isso enfraquece exatamente a auditoria que justifica o projeto.
+🎯 *Recomendo pedir credencial de serviço dedicada ao Hub* e verificar se a API aceita header identificando
+o atendente. Se não aceitar, registrar a limitação explicitamente. **Vale levar ao Diego junto do pedido de
+rotação** — é o mesmo interlocutor.
 
 ---
 

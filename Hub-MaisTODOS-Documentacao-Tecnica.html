@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handoff Técnico do Hub</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  html { color-scheme: light dark; }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  @media print {
+    .indice { display: none !important; }
+    .corpo { grid-template-columns: 1fr !important; }
+    section { break-inside: avoid-page; }
+    .tabela-wrap { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<style>
+  :root {
+    --ground: #FBFBFB;
+    --surface: #FFFFFF;
+    --surface-2: #F4F0F8;
+    --ink: #1A1A1A;
+    --ink-2: #434343;
+    --ink-3: #6E6478;
+    --line: #E7E3EB;
+    --line-2: #D2CCD8;
+    --roxo: #7600D6;
+    --roxo-deep: #5E0EA0;
+    --roxo-soft: #F1E6FB;
+    --verde: #3F8A00;
+    --verde-soft: #EAF6DE;
+    --ambar: #8A5300;
+    --ambar-soft: #FBF0DC;
+    --vermelho: #A3231A;
+    --vermelho-soft: #FBE7E5;
+    --sans: "Lexend", Arial, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    --measure: 70ch;
+    --shell: 1240px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #1A0330; --surface: #250744; --surface-2: #2E0D50;
+      --ink: #F6F1FA; --ink-2: #D6C9E4; --ink-3: #A895BC;
+      --line: #3D1E63; --line-2: #4E2A78;
+      --roxo: #C79BFF; --roxo-deep: #B27DFF; --roxo-soft: #330F5C;
+      --verde: #8EDB3C; --verde-soft: #1E3208;
+      --ambar: #E8A33C; --ambar-soft: #3A2708;
+      --vermelho: #FF8B80; --vermelho-soft: #3D110C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1A0330; --surface: #250744; --surface-2: #2E0D50;
+    --ink: #F6F1FA; --ink-2: #D6C9E4; --ink-3: #A895BC;
+    --line: #3D1E63; --line-2: #4E2A78;
+    --roxo: #C79BFF; --roxo-deep: #B27DFF; --roxo-soft: #330F5C;
+    --verde: #8EDB3C; --verde-soft: #1E3208;
+    --ambar: #E8A33C; --ambar-soft: #3A2708;
+    --vermelho: #FF8B80; --vermelho-soft: #3D110C;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-weight: 300; font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .shell { max-width: var(--shell); margin: 0 auto; padding: 0 24px 110px; }
+
+  .topo { border-bottom: 1px solid var(--line); background: var(--surface); }
+  .topo-inner { max-width: var(--shell); margin: 0 auto; padding: 44px 24px 34px; display: flex; flex-direction: column; gap: 18px; }
+  .marca { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--roxo); }
+  .marca-sinal { width: 22px; height: 3px; background: var(--roxo); border-radius: 2px; }
+  h1 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.08; font-weight: 600; letter-spacing: -0.02em; margin: 0; text-wrap: balance; max-width: 22ch; }
+  .sub { margin: 0; max-width: var(--measure); color: var(--ink-2); font-size: 17px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; padding-top: 6px; font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+  .meta b { font-weight: 500; color: var(--ink-2); }
+
+  .ficha { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 40px 0 0; }
+  .ficha div { background: var(--surface); padding: 16px 20px; display: flex; flex-direction: column; gap: 3px; }
+  .ficha .r { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .ficha .v { font-size: 15px; color: var(--ink); font-weight: 400; }
+  .ficha code { font-size: 13px; }
+
+  .corpo { display: grid; grid-template-columns: 1fr; gap: 48px; margin-top: 56px; }
+  @media (min-width: 1040px) {
+    .corpo { grid-template-columns: 236px minmax(0, 1fr); gap: 60px; }
+    .indice { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+  }
+  .indice-titulo { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin: 0 0 12px; }
+  .indice ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; border-left: 1px solid var(--line); counter-reset: sec; }
+  .indice a { display: flex; gap: 9px; padding: 5px 0 5px 14px; margin-left: -1px; border-left: 2px solid transparent; color: var(--ink-2); text-decoration: none; font-size: 13.5px; line-height: 1.35; }
+  .indice a:hover, .indice a:focus-visible { color: var(--roxo); border-left-color: var(--roxo); }
+  .indice .num { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); padding-top: 2px; min-width: 14px; }
+
+  section { scroll-margin-top: 24px; }
+  section + section { margin-top: 66px; }
+  .cap { display: flex; align-items: baseline; gap: 12px; margin: 0 0 8px; }
+  .cap-num { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--roxo); }
+  h2 { font-size: 26px; font-weight: 500; letter-spacing: -0.018em; line-height: 1.22; margin: 0 0 18px; text-wrap: balance; }
+  h3 { font-size: 17.5px; font-weight: 600; margin: 34px 0 10px; letter-spacing: -0.01em; }
+  h4 { font-size: 14.5px; font-weight: 600; margin: 24px 0 8px; color: var(--ink-2); }
+  p { max-width: var(--measure); margin: 0 0 15px; }
+  p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+
+  code { font-family: var(--mono); font-size: 0.86em; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; word-break: break-word; }
+
+  .tabela-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin: 20px 0; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+  th { text-align: left; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; color: var(--ink-3); padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--ink); font-weight: 500; }
+  td code { font-size: 12px; }
+  .num-col { font-variant-numeric: tabular-nums; font-family: var(--mono); color: var(--ink-3) !important; font-weight: 400 !important; }
+
+  .tag { font-family: var(--mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; white-space: nowrap; display: inline-block; }
+  .t-ok { background: var(--verde-soft); color: var(--verde); }
+  .t-refazer { background: var(--vermelho-soft); color: var(--vermelho); }
+  .t-atencao { background: var(--ambar-soft); color: var(--ambar); }
+  .t-neutro { background: var(--surface-2); color: var(--ink-3); }
+
+  ul.lista, ol.lista { max-width: var(--measure); margin: 0 0 15px; padding-left: 20px; }
+  ul.lista li, ol.lista li { margin-bottom: 8px; color: var(--ink-2); }
+  ul.lista li::marker, ol.lista li::marker { color: var(--roxo); }
+
+  .nota { border: 1px solid var(--line-2); border-left: 3px solid var(--roxo); background: var(--surface); border-radius: 0 10px 10px 0; padding: 18px 22px; margin: 22px 0; }
+  .nota-titulo { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--roxo); margin: 0 0 7px; }
+  .nota.risco { border-left-color: var(--ambar); }
+  .nota.risco .nota-titulo { color: var(--ambar); }
+  .nota.critico { border-left-color: var(--vermelho); }
+  .nota.critico .nota-titulo { color: var(--vermelho); }
+
+  .camadas { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .camada { background: var(--surface); padding: 18px 22px; display: grid; gap: 4px 22px; grid-template-columns: 1fr; }
+  @media (min-width: 720px) { .camada { grid-template-columns: 150px minmax(0, 1fr); } }
+  .camada-nome { font-weight: 600; font-size: 13.5px; color: var(--roxo); }
+  .camada p { margin: 0; font-size: 14.5px; max-width: 64ch; }
+
+  .fases { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 20px 0; }
+  .fase { background: var(--surface); padding: 18px 22px; display: grid; grid-template-columns: 1fr; gap: 6px; }
+  @media (min-width: 820px) { .fase { grid-template-columns: 132px 1fr 1fr; gap: 22px; } }
+  .fase-id { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--roxo); letter-spacing: 0.03em; }
+  .fase-e, .fase-c { font-size: 14.5px; color: var(--ink-2); }
+  .fase-c { color: var(--ink-3); }
+  .fase-rot { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; display: block; margin-bottom: 2px; }
+
+  .rodape { margin-top: 76px; padding-top: 22px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-3); max-width: var(--measure); }
+  a { color: var(--roxo); }
+  :focus-visible { outline: 2px solid var(--roxo); outline-offset: 3px; border-radius: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<header class="topo">
+  <div class="topo-inner">
+    <div class="marca"><span class="marca-sinal"></span> MaisTODOS · Documentação de projeto</div>
+    <h1>Handoff técnico do Hub MaisTODOS</h1>
+    <p class="sub">Tudo o que existe, o que se aproveita, o que precisa ser refeito e o que falta levantar, para o time reconstruir o Hub dentro do padrão da empresa.</p>
+    <div class="meta">
+      <span><b>Versão</b> 1.1</span>
+      <span><b>Data</b> 03/09/2026</span>
+      <span><b>Protótipo</b> commit f0eed254</span>
+      <span><b>Fonte</b> código e banco, verificados</span>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+  <div class="ficha">
+    <div><span class="r">Domínio</span><span class="v"><code>hub.maistodos.com.br</code></span></div>
+    <div><span class="r">Hospedagem</span><span class="v">Dokploy MaisTODOS</span></div>
+    <div><span class="r">Banco</span><span class="v">PostgreSQL próprio, com pgvector</span></div>
+    <div><span class="r">Repositório</span><span class="v">GitHub oficial, privado</span></div>
+    <div><span class="r">MVP</span><span class="v">N1 do time de App</span></div>
+    <div><span class="r">Bloqueio principal</span><span class="v">Nenhuma credencial de API obtida</span></div>
+  </div>
+
+  <div class="corpo">
+    <nav class="indice" aria-label="Índice">
+      <p class="indice-titulo">Seções</p>
+      <ol>
+        <li><a href="#s1"><span class="num">1</span> Problema e objetivo</a></li>
+        <li><a href="#s2"><span class="num">2</span> Decisões fechadas</a></li>
+        <li><a href="#s3"><span class="num">3</span> Escopo do MVP</a></li>
+        <li><a href="#s4"><span class="num">4</span> O que existe hoje</a></li>
+        <li><a href="#s5"><span class="num">5</span> Aproveitar ou refazer</a></li>
+        <li><a href="#s6"><span class="num">6</span> Arquitetura alvo</a></li>
+        <li><a href="#s7"><span class="num">7</span> Modelo de dados alvo</a></li>
+        <li><a href="#s8"><span class="num">8</span> Integrações</a></li>
+        <li><a href="#s9"><span class="num">9</span> Requisitos aba a aba</a></li>
+        <li><a href="#s10"><span class="num">10</span> Auditoria</a></li>
+        <li><a href="#s11"><span class="num">11</span> Backlog</a></li>
+        <li><a href="#s12"><span class="num">12</span> Faseamento</a></li>
+        <li><a href="#s13"><span class="num">13</span> Riscos</a></li>
+        <li><a href="#s14"><span class="num">14</span> Pendências</a></li>
+        <li><a href="#s15"><span class="num">15</span> Glossário</a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <section id="s1">
+        <div class="cap"><span class="cap-num">01</span></div>
+        <h2>Problema e objetivo</h2>
+        <p>Hoje o atendimento abre de três a quatro sistemas diferentes para resolver o caso de um único cliente. Isso alonga o tempo de resposta, aumenta a curva de aprendizado de quem entra e espalha o processo. Em paralelo, o conhecimento operacional de cada setor fica descentralizado, então quem precisa de uma resposta rápida sobre outro time depende de perguntar para alguém.</p>
+        <p>O Hub resolve os dois lados numa plataforma só: <strong>operação em uma tela</strong>, com o atendente resolvendo o caso do filiado sem trocar de sistema e com ação auditada, e <strong>conhecimento centralizado</strong>, com qualquer colaborador consultando rotinas, processos e materiais de qualquer setor de forma autônoma. Na segunda fase, a plataforma evolui para CRM de atendimento.</p>
+        <p><strong>Times atendidos:</strong> Crédito PF, Conta Digital, Pagamentos, Logística, App e Cashback. O piloto é modelado sobre o time de App, que é onde o demandante atua e tem domínio do processo. Os demais entram depois, por levantamento com cada squad.</p>
+      </section>
+
+      <section id="s2">
+        <div class="cap"><span class="cap-num">02</span></div>
+        <h2>Decisões fechadas</h2>
+        <p>Da reunião de escopo com a Adabtech e das decisões de produto tomadas ao longo da construção do protótipo. Não reabrir sem falar com o responsável.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Tema</th><th>Decisão</th></tr></thead>
+            <tbody>
+              <tr><td>Plataforma</td><td>Sair do Lovable. O código exportado é ponto de partida, não o produto.</td></tr>
+              <tr><td>Repositório</td><td>GitHub oficial MaisTODOS, privado, por convite. Consolidar os repositórios avulsos.</td></tr>
+              <tr><td>Hospedagem</td><td>Dokploy da MaisTODOS, com homologação e produção.</td></tr>
+              <tr><td>Banco</td><td>Banco próprio, provisionado pela Infra. Sem serviço externo.</td></tr>
+              <tr><td>Domínio</td><td><code>hub.maistodos.com.br</code>.</td></tr>
+              <tr><td>Segurança</td><td>Documento de segurança da TI MaisTODOS, mesmo padrão dos demais sistemas.</td></tr>
+              <tr><td>Permissões</td><td>Derivadas automaticamente do Convenia, por setor e nível. Sem setup manual como regra.</td></tr>
+              <tr><td>Escopo do MVP</td><td>N1, que atende o filiado diretamente. N2 e N3 em standby, porque hoje correm no Jira.</td></tr>
+              <tr><td>Assistente</td><td>Aplicar a identidade visual da Maísa, o chatbot da MaisTODOS.</td></tr>
+              <tr><td>Conteúdo x operação</td><td>Conteúdo é aberto a todo colaborador autenticado. Operação é restrita por papel, com trava no servidor.</td></tr>
+              <tr><td>Ação sensível</td><td>Toda escrita passa por confirmação explícita, com justificativa obrigatória e registro em trilha.</td></tr>
+              <tr><td>Identidade do filiado</td><td>Validação continua humana. Nada de visão por IA.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s3">
+        <div class="cap"><span class="cap-num">03</span></div>
+        <h2>Escopo do MVP</h2>
+        <h3>Entra</h3>
+        <ol class="lista">
+          <li>Login Google restrito ao domínio corporativo, com habilitação por usuário.</li>
+          <li>Permissão automática por setor e nível, vinda do Convenia, com tela de exceção e auditoria de quem tem o quê.</li>
+          <li>Base de conhecimento por time, com sincronização via API do Notion.</li>
+          <li>Módulo operacional do time de App: busca de filiado por CPF, pendências, liberação de cashback e alteração de dados cadastrais.</li>
+          <li>Trilha de auditoria com motivo, link e número do chamado.</li>
+          <li>Assistente conectado à base, com a identidade da Maísa.</li>
+        </ol>
+        <h3>Fica fora, explicitamente</h3>
+        <ul class="lista">
+          <li>Painel N2 e fluxo de N3, que hoje correm no Jira. O campo de definição de N2 do protótipo fica em standby.</li>
+          <li>Os demais seis times, que entram por levantamento depois do modelo de App funcionando.</li>
+          <li>Evolução para CRM de atendimento.</li>
+          <li>Triagem de tickets por IA. A triagem é manual pelo atendente, por decisão de produto.</li>
+        </ul>
+      </section>
+
+      <section id="s4">
+        <div class="cap"><span class="cap-num">04</span></div>
+        <h2>O que existe hoje</h2>
+        <p>Inventário verificado no commit <code>f0eed254</code> e no banco, em 02/09/2026.</p>
+
+        <h3>Stack do protótipo</h3>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Camada</th><th>Tecnologia</th></tr></thead>
+            <tbody>
+              <tr><td>Framework</td><td>TanStack Start com SSR, React, TypeScript</td></tr>
+              <tr><td>Build</td><td>Vite</td></tr>
+              <tr><td>Estilo</td><td>Tailwind com tokens em oklch, shadcn/ui</td></tr>
+              <tr><td>Roteamento</td><td>TanStack Router, layout <code>_authenticated</code></td></tr>
+              <tr><td>Banco</td><td>PostgreSQL gerenciado, com pgvector</td></tr>
+              <tr><td>Autenticação</td><td>Supabase Auth, Google e senha</td></tr>
+              <tr><td>IA</td><td>Embeddings e chat por gateway da plataforma</td></tr>
+              <tr><td>Servidor</td><td>Entrada própria em <code>src/server.ts</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Rotas</h3>
+        <p><strong>Conteúdo, aberto a qualquer colaborador do domínio:</strong> dashboard, universidade, base de conhecimento com busca, processos, fluxogramas, scripts, FAQ, downloads, progresso, perfil e configurações. Mais o guia da operação por área, com comercial, comunicados, ferramentas, financeiras parceiras, fluxos, materiais, onboarding, processos e reprovações, tudo em modo consulta.</p>
+        <p><strong>Operação, restrita por papel:</strong> filiados, cashback, estornos, carteirinhas, painel N2 e auditoria. <strong>Gestão e administração:</strong> painel do gestor, gestão de acessos e central de conhecimento.</p>
+
+        <h3>Componentes que carregam regra de produto</h3>
+        <p>Não são enfeite: são a padronização que impede cada tela de inventar a própria regra. Vale reimplementar o conceito, mesmo trocando a stack.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Componente</th><th>O que faz</th></tr></thead>
+            <tbody>
+              <tr><td><code>AcaoSensivel</code></td><td>Padrão único de escrita: preview do payload, justificativa obrigatória com mínimo de caracteres, confirmação explícita e gravação da trilha. Os quatro módulos de escrita usam este mesmo componente.</td></tr>
+              <tr><td><code>GuardaOperacional</code></td><td>Guarda único de rota. Cada rota declara apenas o módulo. Bloqueia acesso por URL direta.</td></tr>
+              <tr><td>Shells de navegação</td><td>Sidebar filtrada pelo que a pessoa pode operar.</td></tr>
+              <tr><td>Vocabulário de atendimento</td><td>Busca por CPF, cabeçalho do filiado, tabela, badge de status, estado vazio, carregando e aviso de dado fictício.</td></tr>
+              <tr><td>Assistente flutuante</td><td>Arrastável, posição persistida, ponto único de acesso ao assistente.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Modelo de dados atual</h3>
+        <p>Dez tabelas, todas com RLS habilitado.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Tabela</th><th>Conteúdo</th><th>Escrita pelo cliente</th></tr></thead>
+            <tbody>
+              <tr><td><code>profiles</code></td><td>Perfil, criado por gatilho no cadastro</td><td>Só o próprio</td></tr>
+              <tr><td><code>user_roles</code></td><td>Papel por usuário</td><td>Nenhuma</td></tr>
+              <tr><td><code>user_area_access</code></td><td>Permissão de operar por área</td><td>Nenhuma</td></tr>
+              <tr><td><code>kb_documents</code></td><td>Documento da base, com status, versão e origem Notion</td><td>Só administrador</td></tr>
+              <tr><td><code>kb_chunks</code></td><td>Trechos com embedding vetorial</td><td>Só administrador</td></tr>
+              <tr><td><code>kb_categories</code></td><td>Categorias</td><td>Só administrador</td></tr>
+              <tr><td><code>kb_document_versions</code></td><td>Histórico de versões</td><td>Só administrador</td></tr>
+              <tr><td><code>atendimento_auditoria</code></td><td>Trilha de ações sensíveis</td><td>Só inserir a própria</td></tr>
+              <tr><td><code>ai_queries</code></td><td>Perguntas ao assistente</td><td>Só inserir a própria</td></tr>
+              <tr><td><code>ai_usage</code></td><td>Consumo de tokens</td><td>Nenhuma, só servidor</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Papéis:</strong> admin, gestor, colaborador, atendimento N1 e atendimento N2. <strong>Áreas de operação:</strong> Crédito PF, Conta Digital, Pagamentos, Logística, App, Cashback, mais a liberação interna do Painel N2. <strong>Storage:</strong> três buckets privados. <strong>Funções de banco:</strong> sete, sendo seis com elevação de privilégio e caminho de busca fixo.</p>
+
+        <h3>Modelo de acesso atual</h3>
+        <p>Já implementado em três camadas, com fonte única em <code>src/data/permissoes.ts</code>: o arquivo declara os nove módulos operacionais e quem opera cada um, a função <code>podeOperar</code> é a única regra de decisão, o guarda de rota cobre URL direta e o servidor valida o papel. <strong>Este modelo muda no produto final</strong>, porque a fonte do papel passa a ser o Convenia.</p>
+
+        <h3>Base de conhecimento e assistente</h3>
+        <p>É a parte mais madura do protótipo, e funciona de ponta a ponta. O administrador sobe documento, o conteúdo é fatiado, cada trecho recebe embedding e vai para a tabela de trechos. A integração com o Notion é real e multi workspace, com upsert por identificador de página e dedupe por data de edição, aguardando apenas os tokens de cada workspace. O assistente busca por similaridade, responde só com base nos documentos indexados, cita fonte com versão e data, e registra pergunta e consumo de tokens.</p>
+
+        <h3>Segurança já endurecida</h3>
+        <p>Correções aplicadas entre 31/08 e 02/09, verificadas. Servem de checklist para não regredir na reconstrução: cadastro travado no domínio por gatilho no banco, o que cobre também o login por Google; confirmação de e-mail ativa; função de auto promoção a administrador removida; tabela de papéis sem nenhuma política de escrita; políticas permissivas substituídas por filtro herdado do documento; payload de auditoria e registros de IA sanitizados; privilégio amplo revogado, sem TRUNCATE e sem nada para usuário anônimo; cabeçalhos de segurança na resposta; e extensão de navegador sem permissão ampla.</p>
+      </section>
+
+      <section id="s5">
+        <div class="cap"><span class="cap-num">05</span></div>
+        <h2>Aproveitar ou refazer</h2>
+        <p>A tabela mais importante para planejar a reconstrução.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Situação</th><th>Recomendação</th></tr></thead>
+            <tbody>
+              <tr><td>Telas, navegação e fluxo</td><td><span class="tag t-ok">Aproveita</span></td><td>Portar. Maior valor acumulado, jornada validada em uso.</td></tr>
+              <tr><td>Design system e marca</td><td><span class="tag t-ok">Aproveita</span></td><td>Portar como está. Verificado no ar e aderente à marca.</td></tr>
+              <tr><td>Componentes de regra</td><td><span class="tag t-ok">Conceito</span></td><td>Reimplementar mantendo o contrato, inclusive a justificativa obrigatória.</td></tr>
+              <tr><td>Modelo de acesso</td><td><span class="tag t-ok">Conceito</span></td><td>Manter fonte única e guarda por módulo, trocando a origem do papel para o Convenia.</td></tr>
+              <tr><td>Dados da base de conhecimento</td><td><span class="tag t-ok">Aproveita</span></td><td>Portar o desenho de documento, trecho, categoria e versão. Funciona.</td></tr>
+              <tr><td>Embeddings e busca</td><td><span class="tag t-atencao">Referência</span></td><td>Desenho é bom, implementação depende do gateway antigo. Repontar para o provedor escolhido.</td></tr>
+              <tr><td>Integração Notion</td><td><span class="tag t-atencao">Referência</span></td><td>Multi workspace, upsert e dedupe economizam trabalho. Reescrever no novo backend.</td></tr>
+              <tr><td>Backend, auth e RLS</td><td><span class="tag t-refazer">Refazer</span></td><td>Amarrado ao Supabase e ao gateway. Sai tudo.</td></tr>
+              <tr><td>Dados operacionais</td><td><span class="tag t-refazer">Refazer</span></td><td>Hoje é mock em arquivo. Vira integração real.</td></tr>
+              <tr><td>Gravação da auditoria</td><td><span class="tag t-refazer">Refazer</span></td><td>Sai do navegador, vai para o servidor.</td></tr>
+              <tr><td>Migrations</td><td><span class="tag t-neutro">Não confiar</span></td><td>Projeto nasceu de remix. Usar o dump de políticas anexo como estado real.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s6">
+        <div class="cap"><span class="cap-num">06</span></div>
+        <h2>Arquitetura alvo</h2>
+
+        <h3>Infraestrutura</h3>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Camada</th><th>Definição</th></tr></thead>
+            <tbody>
+              <tr><td>Repositório</td><td>GitHub oficial, privado. Consolidar os avulsos antes de desenvolvimento paralelo.</td></tr>
+              <tr><td>Deploy</td><td>Dokploy, com homologação e produção separadas.</td></tr>
+              <tr><td>Banco</td><td>PostgreSQL próprio. <strong>Requer a extensão pgvector</strong> para a busca semântica.</td></tr>
+              <tr><td>Domínio</td><td><code>hub.maistodos.com.br</code>, com certificado gerenciado pela Infra.</td></tr>
+              <tr><td>Autenticação</td><td>Google Workspace restrito ao domínio, mais autorização própria alimentada pelo Convenia.</td></tr>
+              <tr><td>Segredos</td><td>Cofre do ambiente. Nenhuma credencial em arquivo versionado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Fronteira de confiança</h3>
+        <p>A regra que precisa sobreviver à mudança de stack, porque foi o ponto mais atacado na revisão de segurança do protótipo.</p>
+        <div class="camadas">
+          <div class="camada"><div class="camada-nome">Navegador</div><p>Renderiza e esconde o que a pessoa não pode operar. Não é controle de segurança, é experiência de uso.</p></div>
+          <div class="camada"><div class="camada-nome">Servidor</div><p>Autentica, confere o papel e só então usa credencial privilegiada. Toda chamada a sistema externo sai daqui.</p></div>
+          <div class="camada"><div class="camada-nome">Banco</div><p>Última fronteira. Se um controle não existe aqui, ele não existe.</p></div>
+          <div class="camada"><div class="camada-nome">Integrações</div><p>Nenhum token de sistema externo chega ao navegador, em nenhuma hipótese.</p></div>
+        </div>
+        <div class="nota">
+          <p class="nota-titulo">Requisito duro</p>
+          <p>O front conversa apenas com a API do Hub. Nunca direto com banco nem com API de parceiro. No protótipo isso era mitigado por RLS, porque a chave publicável ia para o navegador. Com backend próprio a regra fica mais simples e mais forte.</p>
+        </div>
+
+        <h3>Autenticação</h3>
+        <ul class="lista">
+          <li>Login Google restrito ao domínio corporativo.</li>
+          <li><strong>Domínio não basta.</strong> Além de ser do domínio, o usuário precisa estar habilitado. Hoje o protótipo libera qualquer e-mail do domínio, e isso precisa ser fechado.</li>
+          <li>Exceção, por exemplo um N3 que precise acessar, é liberação de e-mail pelo administrador, não configuração manual de permissão.</li>
+          <li>A validação existe no servidor e no banco, não apenas no formulário. Validação de formulário não protege nada, e o login social cria o usuário por outro caminho.</li>
+        </ul>
+
+        <h3>Autorização pelo Convenia</h3>
+        <p>Mudança central em relação ao protótipo. O Convenia já é a fonte oficial de RH e traz área ou setor e o nível hierárquico. Ao entrar, a pessoa recebe permissão automaticamente: quem é de Logística enxerga Logística, quem é de Crédito enxerga Crédito, sem setup manual. A tela de gestão de acesso continua existindo para exceção, override e auditoria de quem tem o quê.</p>
+        <p>A construir: o mapa de setor do Convenia para área do Hub e de nível hierárquico para papel operacional, guardando a origem de cada permissão para distinguir o que veio do Convenia do que foi exceção manual. <strong>A política de sincronização, se no login, periódica ou por webhook, precisa ser definida com quem opera o Convenia.</strong></p>
+        <p>O conceito que precisa sobreviver: conteúdo é aberto a todo colaborador autenticado, operação é restrita. A permissão derivada do Convenia governa a operação, não o acesso ao conteúdo didático.</p>
+
+        <h3>Segurança</h3>
+        <p>O desenvolvimento segue o documento de segurança da TI. Além dele, estes pontos vêm da revisão do protótipo e valem como requisito: nenhum privilégio para usuário anônimo; papel nunca escrito pelo cliente; nenhum caminho de auto promoção; conteúdo arquivado não vaza por tabela filha; função que contorna a política filtra por conta própria; trilha imutável; dado pessoal mascarado no que é gravado; retenção definida para dado de IA; e cabeçalhos de segurança na resposta.</p>
+        <div class="nota critico">
+          <p class="nota-titulo">O que o domínio próprio resolve</p>
+          <p>No protótipo, a camada de borda da hospedagem remove os cabeçalhos que impedem o enquadramento em iframe, o que deixa a aplicação exposta a clickjacking sobre ações de atendimento. Foi medido e confirmado. Com o Hub em <code>hub.maistodos.com.br</code>, atrás da infraestrutura da MaisTODOS, os cabeçalhos passam a valer. <strong>Este ponto precisa estar fechado antes de qualquer integração real</strong>, porque é quando a ação induzida passa a produzir efeito em sistema produtivo.</p>
+        </div>
+      </section>
+
+      <section id="s7">
+        <div class="cap"><span class="cap-num">07</span></div>
+        <h2>Modelo de dados alvo</h2>
+        <p>Ponto de partida sugerido, herdando o que funciona e acrescentando o que o novo modelo exige.</p>
+        <h4>Identidade e acesso</h4>
+        <ul class="lista">
+          <li>Usuários, com identidade espelhada do Google e estado de habilitação.</li>
+          <li>Papéis por usuário, com <strong>origem</strong> (Convenia ou exceção) e data de sincronização.</li>
+          <li>Áreas de operação liberadas, com a mesma marcação de origem.</li>
+          <li>Registro de cada sincronização com o Convenia, para auditar de onde veio cada permissão.</li>
+        </ul>
+        <h4>Conhecimento</h4>
+        <p>Documentos, trechos com vetor, categorias e versões, no mesmo desenho de hoje. Manter o campo de origem e o identificador da página do Notion, que é o que permite upsert sem duplicar.</p>
+        <h4>Operação e trilha</h4>
+        <p>Trilha com usuário, módulo, ação, alvo mascarado, <strong>motivo, link do chamado e número do chamado</strong>, payload sanitizado, resultado da execução e data. Apenas inserir e ler. Mais consultas e consumo de IA, com política de expurgo.</p>
+        <div class="nota">
+          <p class="nota-titulo">Regra</p>
+          <p>Toda tabela nasce com política de acesso definida. Nenhuma tabela entra em produção com liberação ampla para resolver depois.</p>
+        </div>
+      </section>
+
+      <section id="s8">
+        <div class="cap"><span class="cap-num">08</span></div>
+        <h2>Integrações</h2>
+        <p>Este é o trabalho de bastidor que destrava tudo. <strong>Nenhuma credencial de API foi obtida até o momento.</strong> Enquanto isso não avança, a plataforma continua sendo uma casca navegável com dados fictícios.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Sistema</th><th>Uso no Hub</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td>Convenia</td><td>Setor e nível, para permissão automática</td><td><span class="tag t-ok">Viável</span> já é fonte oficial em outros sistemas</td></tr>
+              <tr><td>Notion</td><td>Base de conhecimento, hoje exportada à mão</td><td><span class="tag t-ok">API conhecida</span> falta o token de cada workspace</td></tr>
+              <tr><td>Jira</td><td>Chamados técnicos e fluxo de N2</td><td><span class="tag t-ok">API conhecida</span></td></tr>
+              <tr><td>Zendesk</td><td>Portal de chamados e atendimento</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Metabase</td><td>Filiados, transações e campanhas</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Motor</td><td>Transações do time de App</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Softnex</td><td>PL e carteirinhas vinculadas</td><td><span class="tag t-atencao">Sem endpoint</span></td></tr>
+              <tr><td>Retool</td><td>Onde hoje roda a liberação de cashback</td><td><span class="tag t-atencao">A confirmar</span> pode ser substituído pelo Hub</td></tr>
+              <tr><td>MaisCash e MaisCash 2.0</td><td>Dados de parceiros e cashback</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Univers</td><td>Cadastro na parceira Raia e Drogasil</td><td><span class="tag t-atencao">Sem endpoint</span></td></tr>
+              <tr><td>Adyen</td><td>Transações financeiras e cartas de cancelamento</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Awin</td><td>Transações de lojas online</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Rakuten</td><td>Transações de lojas online</td><td><span class="tag t-atencao">A confirmar</span></td></tr>
+              <tr><td>Mixpanel</td><td>Jornada do usuário</td><td><span class="tag t-neutro">Fase posterior</span></td></tr>
+              <tr><td>Maísa</td><td>Identidade visual do assistente</td><td><span class="tag t-neutro">Solicitar material</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="nota">
+          <p class="nota-titulo">Ordem sugerida de ataque</p>
+          <p>Convenia, Notion e o sistema de cashback. São os três que destravam, respectivamente, permissões, conteúdo e a primeira operação real.</p>
+        </div>
+
+        <h3>Correções de nomenclatura</h3>
+        <p>A transcrição da reunião trouxe alguns nomes distorcidos. Os corretos são <strong>MaisCash</strong> e não MyCash, <strong>Univers</strong> e não Universe, <strong>Adyen</strong> e não Adem. E "Motor Softnex" não é um sistema: são dois, o Motor para transações do App e o Softnex para PL e carteirinhas.</p>
+
+        <h3>O que já está levantado tecnicamente</h3>
+        <p>A partir das coleções usadas hoje pelo N1 do time de App. Ponto de partida, a reconfirmar com o dono de cada sistema. As chamadas e os contratos estão detalhados na versão em Markdown deste documento, que acompanha o repositório. <strong>Credenciais não constam de nenhuma das versões e devem ser solicitadas e guardadas no cofre do ambiente.</strong></p>
+        <p>Em resumo, já existe endpoint mapeado para busca de filiado por CPF, atualização de contato, ativação e desativação de conta, alteração de documento, estorno, data de liquidação, segunda via de private label e consulta de cashback por período. A liberação de cashback pendente hoje é executada em lote por um fluxo do Retool, e o objetivo é o Hub executar isso diretamente.</p>
+        <div class="nota risco">
+          <p class="nota-titulo">Alerta de segurança</p>
+          <p>As coleções de origem trazem credenciais em texto claro, incluindo a senha do usuário de suporte, que já foi exposta anteriormente. Recomendação técnica: rotacionar essas credenciais antes de usá-las no novo ambiente, e colocá-las apenas no cofre.</p>
+        </div>
+      </section>
+
+      <section id="s9">
+        <div class="cap"><span class="cap-num">09</span></div>
+        <h2>Requisitos aba a aba</h2>
+
+        <h3>Autenticação e primeiro acesso</h3>
+        <p>Login Google restrito ao domínio. Usuário do domínio mas não habilitado recebe mensagem clara de que o acesso precisa ser liberado, não um erro genérico. Perfil criado automaticamente no primeiro acesso.</p>
+
+        <h3>Gestão de acesso</h3>
+        <p>Lista de usuários com papel, área e origem da permissão. Concessão e remoção com trava contra remover o próprio acesso e contra remover o último administrador. Matriz de papel por módulo visível na tela, para a pessoa entender o que cada papel permite. Toda alteração de acesso é ação sensível e vai para a trilha.</p>
+
+        <h3>Base de conhecimento</h3>
+        <p>Conteúdo segmentado por time: rotinas de trabalho, documentação de fluxos, guias operacionais e o que a pessoa executa no dia a dia. Administrador inclui conteúdo e vídeo, usuário comum consulta e <strong>baixa</strong> material para enviar a filiado e parceiro. Busca por texto e por similaridade.</p>
+        <div class="nota risco">
+          <p class="nota-titulo">Notion, regra de escopo</p>
+          <p>Sincronizar por allowlist de espaços, nunca o workspace inteiro. O Notion carrega conteúdo de RH, financeiro e segredo de negócio, e o Hub é consultado por todo colaborador.</p>
+        </div>
+
+        <h3>Módulo operacional do App, piloto</h3>
+        <ol class="lista">
+          <li>Busca de filiado por CPF, com e sem máscara, mostrando cadastro e estado da conta.</li>
+          <li>Pendências do filiado. No piloto, cashback pendente de liberação.</li>
+          <li>Liberação de cashback, hoje feita no Retool, passa a ser executada no Hub.</li>
+          <li>Alteração de dados cadastrais, hoje feita no Retool.</li>
+          <li>Toda escrita usa o padrão de ação sensível: preview do que vai ser enviado, justificativa obrigatória, confirmação explícita, execução e registro.</li>
+        </ol>
+        <p>Estornos e carteirinhas já existem em protótipo, seguem o mesmo padrão e entram conforme a integração correspondente for liberada.</p>
+
+        <h3>Assistente Maísa</h3>
+        <p>Identidade visual oficial da Maísa. Conectado à base de conhecimento e às regras de negócio consolidadas. Responde apenas com base no conteúdo indexado, cita a fonte com versão e data, e aponta o caminho dentro da plataforma quando a resolução estiver em uma tela específica. Quando não encontra, diz que não encontrou e oferece o caminho alternativo, sem inventar resposta.</p>
+      </section>
+
+      <section id="s10">
+        <div class="cap"><span class="cap-num">10</span></div>
+        <h2>Auditoria</h2>
+        <p>Toda ação executada precisa ser rastreável. Antes de confirmar a operação, o atendente informa <strong>motivo do atendimento</strong>, <strong>link do chamado</strong> aberto pelo filiado e <strong>número do chamado</strong>. Só então a operação é executada.</p>
+        <ul class="lista">
+          <li>A gravação acontece <strong>no servidor</strong>, na mesma transação da execução. Registro escrito pelo navegador não é confiável: quem abre o console consegue bloquear o envio e agir sem rastro.</li>
+          <li>A trilha aceita apenas inserir e ler. Nunca alterar nem apagar, por ninguém.</li>
+          <li>Dado pessoal é mascarado. O alvo aparece de forma identificável para auditoria, sem expor o documento completo.</li>
+          <li>Leitura restrita a gestor e administrador. A gravação vale para todos.</li>
+          <li>O resultado da execução entra no registro, inclusive falha. Ação que falhou também é rastro.</li>
+        </ul>
+      </section>
+
+      <section id="s11">
+        <div class="cap"><span class="cap-num">11</span></div>
+        <h2>Backlog</h2>
+        <p>Tarefas da reunião mais o que o inventário técnico acrescentou.</p>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Tarefa</th><th>Depende de</th><th>Fase</th></tr></thead>
+            <tbody>
+              <tr><td class="num-col">1</td><td>Criar o repositório privado na organização GitHub oficial e subir o export</td><td>Saber quem administra a organização</td><td>Imediato</td></tr>
+              <tr><td class="num-col">2</td><td>Convidar os colaboradores</td><td>Lista de e-mails</td><td>Imediato</td></tr>
+              <tr><td class="num-col">3</td><td>Consolidar os repositórios avulsos no Git oficial</td><td>Acesso</td><td>Imediato</td></tr>
+              <tr><td class="num-col">4</td><td>Solicitar à Infra o banco, com pgvector</td><td>Infra</td><td>Imediato</td></tr>
+              <tr><td class="num-col">5</td><td>Solicitar a criação do subdomínio <code>hub.maistodos.com.br</code></td><td>Nome definido</td><td>Imediato</td></tr>
+              <tr><td class="num-col">6</td><td>Configurar deploy no Dokploy, homologação e produção</td><td>4 e 5</td><td>Setup</td></tr>
+              <tr><td class="num-col">7</td><td>Aplicar o documento de segurança da TI desde o início</td><td>Documento</td><td>Setup</td></tr>
+              <tr><td class="num-col">8</td><td>Remover o <code>.env</code> do versionamento e ignorá-lo</td><td></td><td>Setup</td></tr>
+              <tr><td class="num-col">9</td><td>Reescrever o backend: dados, API e autenticação</td><td>4 e 6</td><td>Dev</td></tr>
+              <tr><td class="num-col">10</td><td>Login Google restrito ao domínio, mais habilitação por usuário</td><td>9</td><td>Dev</td></tr>
+              <tr><td class="num-col">11</td><td>Integrar o Convenia e derivar permissão por setor e nível</td><td>API Convenia</td><td>Dev</td></tr>
+              <tr><td class="num-col">12</td><td>Base de conhecimento com sincronização via API do Notion</td><td>Tokens</td><td>Dev</td></tr>
+              <tr><td class="num-col">13</td><td>Módulo operacional do App: busca por CPF e cashback</td><td>APIs</td><td>Dev</td></tr>
+              <tr><td class="num-col">14</td><td>Trilha gravada no servidor, com motivo, link e número do chamado</td><td>9</td><td>Dev</td></tr>
+              <tr><td class="num-col">15</td><td>Aplicar a identidade visual da Maísa no assistente</td><td>Material</td><td>Dev</td></tr>
+              <tr><td class="num-col">16</td><td>Incorporar as regras de negócio levantadas como fonte do Hub</td><td>Entrega</td><td>Dev</td></tr>
+              <tr><td class="num-col">17</td><td>Portar o design system e a marca, com os logos oficiais</td><td></td><td>Dev</td></tr>
+              <tr><td class="num-col">18</td><td>Publicar em homologação e liberar acesso para validação</td><td>Anteriores</td><td>Homologação</td></tr>
+              <tr><td class="num-col">19</td><td>Confirmar os cabeçalhos de segurança no domínio próprio, medindo a resposta</td><td>5</td><td>Homologação</td></tr>
+              <tr><td class="num-col">20</td><td>Definir e implementar a retenção da trilha de auditoria</td><td>Jurídico</td><td>Homologação</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s12">
+        <div class="cap"><span class="cap-num">12</span></div>
+        <h2>Faseamento</h2>
+        <div class="fases">
+          <div class="fase">
+            <div class="fase-id">Fase 0 · Setup</div>
+            <div class="fase-e"><span class="fase-rot">Entrega</span>Repositório, banco, domínio, deploy e requisitos de segurança</div>
+            <div class="fase-c"><span class="fase-rot">Critério</span>A aplicação responde em <code>hub.maistodos.com.br</code>, com os cabeçalhos de segurança medidos na resposta</div>
+          </div>
+          <div class="fase">
+            <div class="fase-id">Fase 1 · Fundação</div>
+            <div class="fase-e"><span class="fase-rot">Entrega</span>Backend próprio, login restrito, permissão via Convenia, auditoria</div>
+            <div class="fase-c"><span class="fase-rot">Critério</span>O usuário entra e vê apenas o que seu setor e nível permitem, e a ação dele aparece na trilha gravada pelo servidor</div>
+          </div>
+          <div class="fase">
+            <div class="fase-id">Fase 2 · Conhecimento</div>
+            <div class="fase-e"><span class="fase-rot">Entrega</span>Base sincronizada com o Notion, regras de negócio e assistente Maísa</div>
+            <div class="fase-c"><span class="fase-rot">Critério</span>O time de App consulta e baixa material sem sair do Hub, e o assistente cita a fonte</div>
+          </div>
+          <div class="fase">
+            <div class="fase-id">Fase 3 · Operação</div>
+            <div class="fase-e"><span class="fase-rot">Entrega</span>Módulo operacional real do App, com CPF e cashback, auditado</div>
+            <div class="fase-c"><span class="fase-rot">Critério</span>Liberação de cashback executada pelo Hub, não pelo Retool</div>
+          </div>
+          <div class="fase">
+            <div class="fase-id">Fase 4 · Expansão</div>
+            <div class="fase-e"><span class="fase-rot">Entrega</span>Demais times, N2 e N3, Mixpanel e Jira, evolução para CRM</div>
+            <div class="fase-c"><span class="fase-rot">Critério</span>Backlog levantado time a time</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="s13">
+        <div class="cap"><span class="cap-num">13</span></div>
+        <h2>Riscos</h2>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Risco</th><th>Efeito</th><th>Mitigação</th></tr></thead>
+            <tbody>
+              <tr><td>Ausência total de credenciais de API</td><td>Maior ameaça ao prazo. Sem elas, a entrega é uma casca navegável</td><td>Começar por Convenia, Notion e cashback. Abrir chamado por sistema, com dono identificado</td></tr>
+              <tr><td>Dependência do levantamento de regras de negócio</td><td>A base consolidada depende de entrega fora do controle do projeto</td><td>Estruturar a base para receber o conteúdo depois, sem bloquear o resto</td></tr>
+              <tr><td>Backend do Lovable não é reaproveitável</td><td>Backend começa do zero</td><td>Já previsto. Front e telas aceleram</td></tr>
+              <tr><td>Escopo tende a crescer</td><td>Sete times e CRM são fase posterior</td><td>MVP é N1 do time de App. Manter</td></tr>
+              <tr><td>Governança de repositórios</td><td>Existe mais de um Git com o projeto</td><td>Consolidar antes de qualquer desenvolvimento paralelo</td></tr>
+              <tr><td>Clickjacking até haver domínio próprio</td><td>Ação de atendimento induzida por site de terceiro</td><td>Fecha na Fase 0. Não integrar API real antes disso</td></tr>
+              <tr><td>Credenciais já expostas em coleções</td><td>Uso indevido de API de produção</td><td>Rotacionar antes de usar no novo ambiente</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s14">
+        <div class="cap"><span class="cap-num">14</span></div>
+        <h2>Pendências por pessoa</h2>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Responsável</th><th>Pendência</th></tr></thead>
+            <tbody>
+              <tr><td>Diego, MaisTODOS</td><td>Lista de e-mails para convite no GitHub. Credenciais de API dos sistemas da seção 8. Tokens do Notion com os administradores de cada workspace. Material de identidade visual da Maísa. Depois do modelo de App funcionando, levantamento com os demais times.</td></tr>
+              <tr><td>Adabtech</td><td>Repositório, convites e consolidação dos Gits. Solicitações à Infra, banco e subdomínio. Aplicação do documento de segurança desde o início.</td></tr>
+              <tr><td>Infra e TI MaisTODOS</td><td>Provisionar o banco com pgvector. Criar o subdomínio. Entregar o documento de segurança.</td></tr>
+              <tr><td>Levantamento interno</td><td>Concluir as regras de negócio, que são fonte de alimentação do Hub.</td></tr>
+              <tr><td>Jurídico e compliance</td><td>Definir o prazo de guarda da trilha de auditoria.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s15">
+        <div class="cap"><span class="cap-num">15</span></div>
+        <h2>Glossário</h2>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Termo</th><th>Significado</th></tr></thead>
+            <tbody>
+              <tr><td>Filiado</td><td>Cliente do Cartão de TODOS</td></tr>
+              <tr><td>N1, N2, N3</td><td>Níveis de atendimento. N1 atende o filiado diretamente</td></tr>
+              <tr><td>Convenia</td><td>Sistema de RH, fonte oficial de setor e nível hierárquico</td></tr>
+              <tr><td>Ação sensível</td><td>Escrita em sistema real, que exige preview, justificativa, confirmação e trilha</td></tr>
+              <tr><td>Área de operação</td><td>Recorte por time que define o que a pessoa pode operar</td></tr>
+              <tr><td>Conteúdo x operação</td><td>Conteúdo é didático e aberto. Operação executa ação e é restrita</td></tr>
+              <tr><td>PL, private label</td><td>Cartão de marca própria</td></tr>
+              <tr><td>Mock</td><td>Dado fictício, para validar a tela sem tocar em sistema real</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="rodape">Documento interno MaisTODOS, versão 1.1 de 03/09/2026. Acompanha dois anexos: o dump de políticas RLS e privilégios do protótipo, necessário porque as migrations não descrevem o schema completo, e o documento de escopo gerado na reunião com a Adabtech. Tudo que este documento afirma sobre o banco foi lido do banco, e sobre o código foi lido do código, no commit citado.</p>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>
